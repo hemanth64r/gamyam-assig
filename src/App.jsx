@@ -7,6 +7,9 @@ import ProductCards from './components/ProductCards';
 import SearchBar from './components/SearchBar';
 import useDebounce from './hooks/useDebounce';
 import ProductForm from './components/ProductForm';
+import Pagination from './components/Pagination';
+
+const ITEMS_PER_PAGE = 6;
 
 function App() {
   const [products, setProducts] = useState(initialProducts);
@@ -14,6 +17,7 @@ function App() {
   const [searchText, setSearchText] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const debouncedSearchTerm = useDebounce(searchText, 500);
 
@@ -25,6 +29,15 @@ function App() {
       product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
   }, [products, debouncedSearchTerm]);
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset to page 1 when search changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
 
   const handleAddProduct = (productData) => {
     const newProduct = {
@@ -55,6 +68,10 @@ function App() {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingProduct(null);
+  };
+
+  const onPageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -99,12 +116,19 @@ function App() {
         ) : (
           <>
             {viewMode === 'list' ? (
-              <ProductList products={filteredProducts} onEdit={handleEditClick} />
+              <ProductList products={paginatedProducts} onEdit={handleEditClick} />
             ) : (
-              <ProductCards products={filteredProducts} onEdit={handleEditClick} />
+              <ProductCards products={paginatedProducts} onEdit={handleEditClick} />
             )}
           </>
         )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          itemsPerPage={ITEMS_PER_PAGE}
+          totalItems={filteredProducts.length}
+        />
       </main>
 
       {showForm && (
