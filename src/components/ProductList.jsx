@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProductList.css';
 
-const ProductList = ({ products }) => {
+const ProductList = ({ products, onEdit }) => {
     return (
         <div className="product-list-container">
             <table className="product-table">
@@ -26,7 +26,7 @@ const ProductList = ({ products }) => {
                             <td>{product.stock}</td>
                             <td>{product.description}</td>
                             <td>
-                                <button className="btn-edit">Edit</button>
+                                <button className="btn-edit" onClick={()=>onEdit(product)}>Edit</button>
                             </td>
                         </tr>
                     ))}
